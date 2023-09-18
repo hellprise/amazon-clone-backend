@@ -75,6 +75,14 @@ export class UserService {
 
 		const isExists = user.favorites.some(product => product.id === productId)
 
+		const product = await this.prisma.product.findUnique({
+			where: {
+				id: productId
+			}
+		})
+
+		if (!product) throw new NotFoundException('Product not found')
+
 		await this.prisma.user.update({
 			where: {
 				id: user.id
@@ -88,6 +96,6 @@ export class UserService {
 			}
 		})
 
-		return { message: 'Success' }
+		return 'Success'
 	}
 }

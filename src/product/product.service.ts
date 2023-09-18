@@ -67,12 +67,10 @@ export class ProductService {
 		const { perPage, skip } = this.paginationService.getPagination(dto)
 
 		const products = await this.prisma.product.findMany({
-			where: {
-				...prismaSearchTermFilter
-			},
+			where: prismaSearchTermFilter,
 			orderBy: prismaSort,
-			take: perPage,
 			skip,
+			take: perPage,
 			select: returnProductObject
 		})
 
@@ -161,14 +159,21 @@ export class ProductService {
 				price: 0
 			}
 		})
-
-		if (!product) throw new NotFoundException('Product not found')
+		// такий метод для того, щоб не створювати на клієнті дві сторінки, - одну для створення, іншу для редагування. Це все буде в одній сторінці. продукт буде створюватись з пустими полями, а потім вони будуть заповнюватись
 
 		return product.id
 	}
 
 	async update(id: number, dto: ProductDto) {
 		const { name, description, price, categoryId, images } = dto
+
+		const findCategory = await this.prisma.category.findUnique({
+			where: {
+				id: categoryId
+			}
+		})
+
+		if (!findCategory) throw new NotFoundException('Category not found')
 
 		return this.prisma.product.update({
 			where: {
@@ -179,17 +184,21 @@ export class ProductService {
 				slug: generateSlug(name),
 				description,
 				price,
+				images,
 				category: {
 					connect: {
 						id: categoryId
 					}
-				},
-				images
+				}
 			}
 		})
 	}
 
 	async delete(id: number) {
+		const product = await this.byId(id)
+
+		if (!product) throw new NotFoundException('Product not found')
+
 		return this.prisma.product.delete({
 			where: {
 				id

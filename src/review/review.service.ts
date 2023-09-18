@@ -7,6 +7,8 @@ import { returnReviewObject } from './return-review.object'
 export class ReviewService {
 	constructor(private prisma: PrismaService) {}
 
+	// TODO: add update and delete methods
+
 	async getAll() {
 		const reviews = await this.prisma.review.findMany({
 			orderBy: {
@@ -15,7 +17,7 @@ export class ReviewService {
 			select: returnReviewObject
 		})
 
-		if (!reviews) throw new NotFoundException('Categories not found')
+		if (!reviews) throw new NotFoundException('Reviews not found')
 
 		return reviews
 	}
@@ -27,7 +29,8 @@ export class ReviewService {
 			}
 		})
 
-		if (!product) throw new NotFoundException('Product not found')
+		if (!product)
+			throw new NotFoundException('Product with your product id not found')
 
 		return this.prisma.review.create({
 			data: {
@@ -49,12 +52,8 @@ export class ReviewService {
 	async getAverageValueByProductId(productId: number) {
 		return this.prisma.review
 			.aggregate({
-				where: {
-					productId
-				},
-				_avg: {
-					rating: true
-				}
+				where: { productId },
+				_avg: { rating: true }
 			})
 			.then(data => data._avg)
 	}
