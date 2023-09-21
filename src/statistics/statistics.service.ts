@@ -18,7 +18,7 @@ export class StatisticsService {
 			_sum: { total: true }
 		})
 
-		const total = totalAmount._sum.total
+		const total = totalAmount._sum.total || 0
 
 		return [
 			{
