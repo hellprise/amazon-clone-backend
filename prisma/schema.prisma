@@ -12,11 +12,12 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  email      String @unique
+  email      String  @unique
   password   String
-  name       String @unique
-  avatarPath String @default("/uploads/default-avatar.png") @map("avatar_path")
-  phone      String @unique @default("")
+  name       String  @unique
+  avatarPath String  @default("/uploads/default-avatar.png") @map("avatar_path")
+  phone      String  @unique @default("")
+  isAdmin    Boolean @default(false) @map("is_admin")
 
   orders    Order[]
   reviews   Review[]

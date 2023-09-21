@@ -1,16 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+
 import { PrismaService } from 'src/prisma.service'
 import { returnProductObject } from 'src/product/return-product.object'
+
 import { OrderDto } from './dto/order.dto'
 import { PaymentStatusDto } from './dto/payment-status.dto'
 
 @Injectable()
 export class OrderService {
-	constructor(
-		private prisma: PrismaService // private readonly paginationService: PaginationService
-	) {}
+	constructor(private prisma: PrismaService) {}
 
-	async getAll(userId: number) {
+	async getAll() {
+		const orders = await this.prisma.order.findMany({
+			orderBy: {
+				createdAt: 'desc'
+			},
+			include: {
+				items: {
+					include: {
+						product: {
+							select: returnProductObject
+						}
+					}
+				}
+			}
+		})
+
+		if (!orders) throw new NotFoundException('Orders not found')
+
+		return orders
+	}
+
+	async getByUserId(userId: number) {
 		const orders = await this.prisma.order.findMany({
 			where: {
 				userId
@@ -29,7 +50,7 @@ export class OrderService {
 			}
 		})
 
-		if (!orders) throw new NotFoundException('Orders not found')
+		if (!orders) throw new NotFoundException('User has no orders')
 
 		return orders
 	}

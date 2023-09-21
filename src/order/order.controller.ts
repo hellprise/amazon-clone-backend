@@ -7,8 +7,10 @@ import {
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
+
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CurrentUser } from 'src/auth/decorators/user.decorator'
+
 import { OrderDto } from './dto/order.dto'
 import { PaymentStatusDto } from './dto/payment-status.dto'
 import { OrderService } from './order.service'
@@ -18,9 +20,15 @@ export class OrderController {
 	constructor(private readonly orderService: OrderService) {}
 
 	@Get()
+	@Auth('admin')
+	getAll() {
+		return this.orderService.getAll()
+	}
+
+	@Get('by-user')
 	@Auth()
-	getAll(@CurrentUser('id') id: number) {
-		return this.orderService.getAll(id)
+	getByUserId(@CurrentUser('id') userId: number) {
+		return this.orderService.getByUserId(userId)
 	}
 
 	@UsePipes(new ValidationPipe())
